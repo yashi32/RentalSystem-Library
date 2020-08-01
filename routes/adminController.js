@@ -71,5 +71,48 @@ router.post('/create-user',(req,res)=>{
 router.post('/rent-book',(req,res)=>{
     let bookId=req.query.bookId;
     let userId=req.query.userId;
-    
+    let book=Book.findById(bookId);
+    let user=User.findById(userId);
+    if(book!==null && book!==undefined)
+    {
+        if(book.loan_status==false)
+        {
+            book.loan_status=true;
+            book.save();
+        }
+    }
+    else{
+            return res.status(200).json({message:"Book is already rented"});
+    }
+
+    if(user)
+    {
+        let rental=Rental.create({
+            Book:bookId,
+            User:userId
+        });
+        if(rental)
+        {
+            return res.status(200).json({message:"The book has been successfully rented"})
+        }
+
+    }
+    else{
+        return res.status(200).json({message:"No such user exist in db"});
+    }
+
+})
+
+//List all books
+router.get('/rented-books-list',(req,res)=>{
+    let loanBooks=Rental.find({});
+    let ans=[];
+    for(var i=0;i<loanBooks.length;i++)
+    {
+        let bookId = loanBoooks[i].Book;
+      let book =  Book.findById(bookId);
+      ans.push(book.title);
+    }
+    return res.status(200).json({message:"List of rented books",
+                                    books:ans});
 })
